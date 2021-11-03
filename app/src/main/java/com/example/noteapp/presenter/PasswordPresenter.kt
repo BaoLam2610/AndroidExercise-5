@@ -57,4 +57,8 @@ class PasswordPresenter {
             iRegisterPassword?.onSuccessful()
     }
 
+    fun resetPassword(){
+        editor.clear().commit()
+    }
+
 }

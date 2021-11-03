@@ -4,16 +4,14 @@ import android.os.Parcelable
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import kotlinx.android.parcel.Parcelize
-import java.io.Serializable
+import java.util.*
 
 @Entity
 @Parcelize
 data class Note(
     @PrimaryKey(autoGenerate = true)
     var id: Int,
-    val day: Int,
-    val month: Int,
-    val year: Int,
+    val date: Date,
     val title: String,
-    val content: String
-): Parcelable
+    val content: String,
+) : Parcelable

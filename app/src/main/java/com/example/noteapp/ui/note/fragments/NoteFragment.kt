@@ -13,21 +13,27 @@ import com.example.noteapp.event.INoteModify
 import com.example.noteapp.model.Note
 import com.example.noteapp.presenter.NotePresenter
 import com.example.noteapp.until.Constant.DELETE_NOTE_SUCCESSFUL
+import com.example.noteapp.until.Constant.SAVE_NOTE_SUCCESSFUL
+import com.example.noteapp.until.Constant.UPDATE_NOTE_SUCCESSFUL
+import com.example.noteapp.until.Constant.convertToDate
 import kotlinx.android.synthetic.main.fragment_note.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class NoteFragment : Fragment(R.layout.fragment_note), INoteModify, INoteModify.Check {
 
     lateinit var presenter: NotePresenter
-    var d: Int? = null
-    var m: Int? = null
-    var y: Int? = null
+    var d: String? = null
+    var m: String? = null
+    var y: String? = null
 
     companion object {
-        fun newInstance(day: Int, month: Int, year: Int): NoteFragment {
+        fun newInstance(day: String, month: String, year: String): NoteFragment {
             val args = Bundle()
-            args.putInt("d", day)
-            args.putInt("m", month)
-            args.putInt("y", year)
+            args.putString("d", day)
+            args.putString("m", month)
+            args.putString("y", year)
             val fragment = NoteFragment()
             fragment.arguments = args
             return fragment
@@ -37,9 +43,9 @@ class NoteFragment : Fragment(R.layout.fragment_note), INoteModify, INoteModify.
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         presenter = NotePresenter(requireContext(), this, this)
-        d = arguments?.getInt("d")
-        m = arguments?.getInt("m")
-        y = arguments?.getInt("y")
+        d = arguments?.getString("d")
+        m = arguments?.getString("m")
+        y = arguments?.getString("y")
         tvDate.text = "$d/$m/$y"
         presenter.checkNote(d, m, y)
 
@@ -50,7 +56,7 @@ class NoteFragment : Fragment(R.layout.fragment_note), INoteModify, INoteModify.
         btnSave.setOnClickListener {
             presenter.save(
                 Note(0,
-                    d!!, m!!, y!!,
+                    convertToDate("$d/$m/$y"),
                     etTitle.text.toString(),
                     etContent.text.toString())
             )
@@ -67,7 +73,7 @@ class NoteFragment : Fragment(R.layout.fragment_note), INoteModify, INoteModify.
             android.R.id.home -> activity?.onBackPressed()
             R.id.acDelete -> {
                 presenter.delete(d, m, y)
-                activity?.onBackPressed()
+
             }
         }
         return true
@@ -75,7 +81,22 @@ class NoteFragment : Fragment(R.layout.fragment_note), INoteModify, INoteModify.
 
     override fun onSuccessful(type: Int) {
         when (type) {
-            DELETE_NOTE_SUCCESSFUL -> ""
+            DELETE_NOTE_SUCCESSFUL -> CoroutineScope(Dispatchers.Main).launch {
+                Toast.makeText(requireContext(), "Deleted note successful", Toast.LENGTH_SHORT)
+                    .show()
+                activity?.onBackPressed()
+            }
+
+            SAVE_NOTE_SUCCESSFUL -> CoroutineScope(Dispatchers.Main).launch {
+                Toast.makeText(requireContext(),
+                    "Saved note successful",
+                    Toast.LENGTH_SHORT).show()
+            }
+            UPDATE_NOTE_SUCCESSFUL -> CoroutineScope(Dispatchers.Main).launch {
+                Toast.makeText(requireContext(),
+                    "Updated note successful",
+                    Toast.LENGTH_SHORT).show()
+            }
         }
     }
 

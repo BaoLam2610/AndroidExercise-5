@@ -66,7 +66,14 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
-    private fun setupActionBar(){
+    fun changeViewPager(type: Int) {
+        if (type == -1)
+            viewPager.currentItem = viewPager.currentItem - 1
+        else
+            viewPager.currentItem = viewPager.currentItem + 1
+    }
+
+    private fun setupActionBar() {
         setSupportActionBar(toolbar)
         supportActionBar?.title = "Calendar"
     }
@@ -77,8 +84,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when(item.itemId){
-            R.id.acNoteList ->{
+        when (item.itemId) {
+            R.id.acNoteList -> {
                 Intent(this, NoteActivity::class.java).also {
                     it.putExtra(Constant.TYPE_ACTIVITY, "list")
                     startActivity(it)

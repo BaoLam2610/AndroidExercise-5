@@ -20,9 +20,9 @@ class NoteActivity : AppCompatActivity() {
             when (intent.getStringExtra(TYPE_ACTIVITY)) {
                 "note" -> setFragment(
                     NoteFragment.newInstance(
-                        intent.getIntExtra(DAY,1)!!,
-                        intent.getIntExtra(MONTH,1)!!,
-                        intent.getIntExtra(YEAR,2020)!!
+                        intent.getStringExtra(DAY)!!,
+                        intent.getStringExtra(MONTH)!!,
+                        intent.getStringExtra(YEAR)!!
                     )
                 )
                 "list" -> setFragment(NoteListFragment.newInstance())

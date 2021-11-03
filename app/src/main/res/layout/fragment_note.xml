@@ -47,7 +47,7 @@
         android:padding="10dp"
         android:gravity="top"
         android:hint="Content"
-        android:inputType="text"
+        android:inputType="textMultiLine"
         android:background="@color/white"
         android:id="@+id/etContent"
         android:layout_width="match_parent"

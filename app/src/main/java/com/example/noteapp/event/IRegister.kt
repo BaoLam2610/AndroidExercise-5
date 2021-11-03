@@ -5,5 +5,10 @@ interface IRegister {
         fun onSuccessful()
         fun onFailure(mes: String)
     }
+
+    interface Reset{
+
+    }
+
     fun checkFirst(type: Int)
 }

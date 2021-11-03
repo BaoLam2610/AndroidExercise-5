@@ -3,23 +3,26 @@ package com.example.noteapp.ui.main.fragments
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.GridLayoutManager
 import com.example.noteapp.R
 import com.example.noteapp.adapter.CalendarAdapter
 import com.example.noteapp.event.IOnClickItem
+import com.example.noteapp.ui.main.MainActivity
 import com.example.noteapp.ui.note.NoteActivity
 import com.example.noteapp.until.Constant.DAY
 import com.example.noteapp.until.Constant.MONTH
 import com.example.noteapp.until.Constant.TYPE_ACTIVITY
 import com.example.noteapp.until.Constant.YEAR
+import com.example.noteapp.until.Constant.dc
 import kotlinx.android.synthetic.main.fragment_calendar.*
 import java.time.LocalDate
 import java.time.YearMonth
 
 class CalendarFragment : Fragment(R.layout.fragment_calendar) {
 
+    private val TAG = "CalendarFragment"
     private var adapter: CalendarAdapter? = null
     lateinit var selectedDate: LocalDate
     var yearMonth: YearMonth? = null
@@ -55,12 +58,18 @@ class CalendarFragment : Fragment(R.layout.fragment_calendar) {
 
         adapter!!.setIOnClickItem(object : IOnClickItem.ICalendar {
             override fun onDoubleClickItem(day: Int) {
-                Intent(requireContext(), NoteActivity::class.java).also {
-                    it.putExtra(TYPE_ACTIVITY, "note")
-                    it.putExtra(DAY, day)
-                    it.putExtra(MONTH, selectedDate.month.value)
-                    it.putExtra(YEAR, selectedDate.year)
-                    startActivity(it)
+                when (day) {
+                    -1 -> (activity as MainActivity).changeViewPager(-1)
+                    -2 -> (activity as MainActivity).changeViewPager(-2)
+                    else -> {
+                        Intent(requireContext(), NoteActivity::class.java).also {
+                            it.putExtra(TYPE_ACTIVITY, "note")
+                            it.putExtra(DAY, dc.format(day))
+                            it.putExtra(MONTH, dc.format(selectedDate.month.value))
+                            it.putExtra(YEAR, selectedDate.year.toString())
+                            startActivity(it)
+                        }
+                    }
                 }
             }
         })

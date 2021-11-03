@@ -45,7 +45,7 @@ class CalendarAdapter(
     @SuppressLint("ClickableViewAccessibility")
     override fun onBindViewHolder(
         holder: CalendarViewHolder,
-        position: Int,
+        @SuppressLint("RecyclerView") position: Int,
     ) {
         notePresenter = NotePresenter(mContext, this)
         holder.itemView.apply {
@@ -56,7 +56,14 @@ class CalendarAdapter(
             val gestureDetector =
                 GestureDetector(mContext, object : GestureDetector.SimpleOnGestureListener() {
                     override fun onDoubleTap(e: MotionEvent?): Boolean {
-                        iOnDoubleClickItem?.onDoubleClickItem(tvDay.text.toString().toInt())
+                        if (!check(position))
+                            iOnDoubleClickItem?.onDoubleClickItem(tvDay.text.toString().toInt())
+                        else {
+                                if (position < dayOfMonth.indexOf(1))
+                                    iOnDoubleClickItem?.onDoubleClickItem(-1)
+                                else if(position > dayOfMonth.lastIndexOf(monthLength))
+                                    iOnDoubleClickItem?.onDoubleClickItem(-2)
+                        }
                         return true
                     }
                 })

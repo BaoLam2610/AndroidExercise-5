@@ -43,6 +43,7 @@ class LoginActivity : AppCompatActivity(), IRegister.Password, IRegister {
 
     override fun onSuccessful() {
         Intent(this, MainActivity::class.java).also {
+            it.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
             startActivity(it)
         }
     }
@@ -51,6 +52,7 @@ class LoginActivity : AppCompatActivity(), IRegister.Password, IRegister {
         val dialog = AlertDialog.Builder(this)
             .setTitle("Lỗi")
             .setMessage(mes)
+            .setNegativeButton("Cancel",null)
             .create()
         dialog.show()
     }
@@ -58,15 +60,22 @@ class LoginActivity : AppCompatActivity(), IRegister.Password, IRegister {
     override fun checkFirst(type: Int) {
         when (type) {
             0 -> {
+                tvForget.visibility = View.GONE
+                etConfirmPassword.visibility = View.VISIBLE
                 btnRegister.setOnClickListener {
                     presenter.register(etPassword.text.toString(),
                         etConfirmPassword.text.toString())
                 }
             }
             1 -> {
+                tvForget.visibility = View.VISIBLE
                 etConfirmPassword.visibility = View.GONE
                 btnRegister.setOnClickListener {
                     presenter.checkPassword(etPassword.text.toString())
+                }
+                tvForget.setOnClickListener {
+                    presenter.resetPassword()
+                    presenter.check()
                 }
             }
         }

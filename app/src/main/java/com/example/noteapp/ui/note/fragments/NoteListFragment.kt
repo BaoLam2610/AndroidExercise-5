@@ -1,5 +1,6 @@
 package com.example.noteapp.ui.note.fragments
 
+import android.content.DialogInterface
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
@@ -7,6 +8,7 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
@@ -17,6 +19,10 @@ import com.example.noteapp.event.INoteModify
 import com.example.noteapp.event.IOnClickItem
 import com.example.noteapp.model.Note
 import com.example.noteapp.presenter.NotePresenter
+import com.example.noteapp.until.Constant
+import com.example.noteapp.until.Constant.getDayOfMonthFromDate
+import com.example.noteapp.until.Constant.getMonthFromDate
+import com.example.noteapp.until.Constant.getYearFromDate
 import kotlinx.android.synthetic.main.fragment_note_list.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -54,7 +60,12 @@ class NoteListFragment : Fragment(R.layout.fragment_note_list), INoteModify.Note
             rvNotes.layoutManager = LinearLayoutManager(requireContext())
             adapter.setIOnClickItem(object : IOnClickItem.INote {
                 override fun onClickItem(note: Note) {
-                    setFragment(NoteFragment.newInstance(note.day, note.month, note.year))
+                    setFragment(
+                        NoteFragment.newInstance(
+                            getDayOfMonthFromDate(note.date),
+                            getMonthFromDate(note.date),
+                            getYearFromDate(note.date)
+                        ))
                 }
             })
         }
@@ -98,16 +109,25 @@ class NoteListFragment : Fragment(R.layout.fragment_note_list), INoteModify.Note
         when (item.itemId) {
             android.R.id.home -> activity?.onBackPressed()
             R.id.acBackup -> presenter.backup()
-            R.id.acRestore -> presenter.restore()
+            R.id.acRestore -> {
+                val dialog = AlertDialog.Builder(requireContext())
+                    .setTitle("Alert")
+                    .setMessage("Do you want to restore old data?")
+                    .setPositiveButton("Yes"){ _, _ ->
+                        presenter.restore()
+                    }
+                    .setNegativeButton("Cancel",null)
+                    .create()
+                dialog.show()
+            }
         }
         return true
     }
 
     override fun onBackup(path: String) {
         CoroutineScope(Dispatchers.Main).launch{
-            Toast.makeText(requireContext(), path, Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(),  "File: $path", Toast.LENGTH_SHORT).show()
         }
-        Log.d(TAG,path)
     }
 
     override fun onRestore() {

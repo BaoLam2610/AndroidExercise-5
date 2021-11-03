@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.noteapp.R
 import com.example.noteapp.event.IOnClickItem
 import com.example.noteapp.model.Note
+import com.example.noteapp.until.Constant.df
 import kotlinx.android.synthetic.main.item_note.view.*
 
 class NoteListAdapter(
@@ -41,7 +42,7 @@ class NoteListAdapter(
     override fun onBindViewHolder(holder: NoteViewHolder, position: Int) {
         val note = noteList?.get(position)
         holder.itemView.apply {
-            tvDate.text = "${note?.day}/${note?.month}/${note?.year}"
+            tvDate.text = df.format(note?.date)
             tvTitle.text = "Title: ${note?.title}"
             tvContent.text = "Content: ${note?.content}"
             setOnClickListener {

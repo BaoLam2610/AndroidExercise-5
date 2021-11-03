@@ -11,6 +11,12 @@ import com.example.noteapp.until.Constant.DELETE_NOTE_SUCCESSFUL
 import com.example.noteapp.until.Constant.FILE_BACKUP
 import com.example.noteapp.until.Constant.SAVE_NOTE_SUCCESSFUL
 import com.example.noteapp.until.Constant.UPDATE_NOTE_SUCCESSFUL
+import com.example.noteapp.until.Constant.convertToDate
+import com.example.noteapp.until.Constant.dc
+import com.example.noteapp.until.Constant.df
+import com.example.noteapp.until.Constant.getDayOfMonthFromDate
+import com.example.noteapp.until.Constant.getMonthFromDate
+import com.example.noteapp.until.Constant.getYearFromDate
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -58,12 +64,16 @@ class NotePresenter {
         var type: Int? = null
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                if (dao?.getNote(note.day, note.month, note.year) == null) {
+                val d = getDayOfMonthFromDate(note.date)
+                val m = getMonthFromDate(note.date)
+                val y = getYearFromDate(note.date)
+                val checkNote = dao?.getNote(d, m, y)
+                if (checkNote == null) {
                     type = SAVE_NOTE_SUCCESSFUL
                     dao?.addNote(note)
                     iNoteModify?.onSuccessful(SAVE_NOTE_SUCCESSFUL)
                 } else {
-                    note.id = dao?.getNote(note.day, note.month, note.year)!!.id
+                    note.id = checkNote.id
                     type = UPDATE_NOTE_SUCCESSFUL
                     dao?.updateNote(note)
                     iNoteModify?.onSuccessful(UPDATE_NOTE_SUCCESSFUL)
@@ -78,10 +88,11 @@ class NotePresenter {
         }
     }
 
-    fun delete(d: Int?, m: Int?, y: Int?) {
+    fun delete(d: String?, m: String?, y: String?) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                dao?.deleteNote(dao?.getNote(d!!, m!!, y!!)!!)
+                val note = dao?.getNote(d!!, m!!, y!!) ?: return@launch
+                dao?.deleteNote(note)
                 iNoteModify?.onSuccessful(DELETE_NOTE_SUCCESSFUL)
             } catch (e: Exception) {
 //                withContext(Dispatchers.Main){
@@ -92,20 +103,21 @@ class NotePresenter {
     }
 
     fun checkItem(position: Int, date: LocalDate, textView: TextView) {
-        val day = textView.text.toString().toInt()
+        val day = dc.format(textView.text.toString().toInt())
         CoroutineScope(Dispatchers.IO).launch {
-            val dateInMonthList = dao?.getAllNoteInMonth(date.month.value, date.year)
+            val dateInMonthList =
+                dao?.getAllNoteInMonth(dc.format(date.month.value), date.year.toString())
             if (dateInMonthList != null) {
                 for (item in dateInMonthList)
-                    if (day == item.day)
+                    if (day == getDayOfMonthFromDate(item.date))
                         iItemCal?.onChangeBackground(position, textView)
             }
         }
     }
 
-    fun checkNote(d: Int?, m: Int?, y: Int?) {
+    fun checkNote(d: String?, m: String?, y: String?) {
         CoroutineScope(Dispatchers.IO).launch {
-            val note = dao?.getNote(d!!, m!!, y!!)
+            val note = dao?.getNote(d!!,m!!,y!!)
             if (note != null) {
                 withContext(Dispatchers.Main) {
                     iNoteExists?.onExists(note)
@@ -131,7 +143,7 @@ class NotePresenter {
                     for (item in noteList) {
                         val sb = StringBuffer()
                         sb.append("${item.id}__")
-                        sb.append("${item.day}__${item.month}__${item.year}__")
+                        sb.append("${df.format(item.date)}__")
                         sb.append("${item.title}__")
                         sb.append("${item.content}")
                         bw.write(sb.toString())
@@ -140,13 +152,6 @@ class NotePresenter {
                     bw.flush()
                     bw.close()
                 }
-//                val bos = ByteArrayOutputStream()
-//                val os = ObjectOutputStream(bos)
-//                os.writeObject(noteList)
-//                val bytes = bos.toByteArray()
-//                fos?.write(bytes)
-//                fos?.close()
-
                 iNoteBackup?.onBackup("${context?.filesDir}/$FILE_BACKUP")
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -159,9 +164,9 @@ class NotePresenter {
         val values: List<String> = sb.split("__")
         note = Note(
             values[0].toInt(),
-            values[1].toInt(), values[2].toInt(), values[3].toInt(),
-            values[4],
-            values[5])
+            convertToDate(values[1]),
+            values[2],
+            values[3])
         return note
     }
 
